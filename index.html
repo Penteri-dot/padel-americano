@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<title>Padel Americano</title>
+<meta name="theme-color" content="#0a0e14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Americano">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230a0e14'/%3E%3Ccircle cx='32' cy='32' r='16' fill='none' stroke='%2322d3a6' stroke-width='4'/%3E%3Cpath d='M32 16v32M16 32h32' stroke='%2322d3a6' stroke-width='3'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' fill='%230a0e14'/%3E%3Ccircle cx='90' cy='90' r='46' fill='none' stroke='%2322d3a6' stroke-width='10'/%3E%3Cpath d='M90 44v92M44 90h92' stroke='%2322d3a6' stroke-width='8'/%3E%3C/svg%3E">
+<style>
+*,*::before,*::after{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0a0e14; --card:#151b24; --card2:#1c2431; --line:#2a3444;
+  --text:#e8edf4; --dim:#8b98ab; --accent:#22d3a6; --accent-dim:#0f6f58;
+  --gold:#f5b942; --red:#ef5b5b;
+  --safe-t:env(safe-area-inset-top); --safe-b:env(safe-area-inset-bottom);
+}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--text)}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif;
+  font-size:16px;line-height:1.4;
+  padding-top:max(var(--safe-t),12px);
+  padding-bottom:calc(var(--safe-b) + 12px);
+  min-height:100vh;overscroll-behavior-y:contain;
+}
+.wrap{max-width:520px;margin:0 auto;padding:0 14px}
+h1{font-size:22px;margin:0;letter-spacing:-.02em}
+h2{font-size:15px;margin:0 0 10px;color:var(--dim);font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+.hidden{display:none!important}
+
+/* ---- topbar ---- */
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px}
+.topbar .sub{font-size:13px;color:var(--dim);margin-top:2px}
+.iconbtn{background:var(--card);border:1px solid var(--line);color:var(--text);
+  border-radius:12px;padding:9px 13px;font-size:14px;font-weight:600;cursor:pointer}
+.iconbtn:active{background:var(--card2)}
+
+/* ---- cards ---- */
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px}
+
+/* ---- setup ---- */
+.namerow{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.namerow .num{width:26px;height:26px;flex:0 0 26px;border-radius:8px;background:var(--card2);
+  color:var(--dim);font-size:13px;font-weight:700;display:grid;place-items:center}
+input[type=text],input[type=number]{
+  flex:1;min-width:0;background:var(--card2);border:1px solid var(--line);color:var(--text);
+  border-radius:10px;padding:12px 12px;font-size:16px;font-family:inherit;outline:none}
+input:focus{border-color:var(--accent)}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{flex:1;min-width:64px;text-align:center;background:var(--card2);border:1px solid var(--line);
+  color:var(--text);border-radius:10px;padding:12px 6px;font-size:15px;font-weight:700;cursor:pointer}
+.chip.on{background:var(--accent-dim);border-color:var(--accent);color:#fff}
+
+/* ---- buttons ---- */
+.btn{display:block;width:100%;background:var(--accent);color:#04231c;border:none;border-radius:14px;
+  padding:17px;font-size:17px;font-weight:800;font-family:inherit;cursor:pointer;letter-spacing:-.01em}
+.btn:active{filter:brightness(.9)}
+.btn:disabled{opacity:.4}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--text);font-weight:700}
+.btn.danger{background:transparent;border:1px solid var(--red);color:var(--red);font-weight:700}
+
+/* ---- court ---- */
+.court{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px;margin-bottom:12px}
+.courtname{font-size:12px;font-weight:800;color:var(--dim);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px}
+.teams{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center}
+.team{min-width:0}
+.team .players{font-size:14px;font-weight:700;line-height:1.25}
+.team .players span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vs{font-size:11px;color:var(--dim);font-weight:800;padding:0 2px}
+.scores{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;margin-top:10px}
+.scorebox{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:8px 4px;text-align:center}
+.scorebox .val{font-size:34px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+.scorebox.win{border-color:var(--accent);background:rgba(34,211,166,.12)}
+.scorebox.win .val{color:var(--accent)}
+.dash{color:var(--dim);font-size:20px;font-weight:800}
+.steppers{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.stepbtn{background:var(--card2);border:1px solid var(--line);color:var(--text);border-radius:10px;
+  padding:14px;font-size:20px;font-weight:800;cursor:pointer;font-family:inherit}
+.stepbtn:active{background:var(--accent-dim)}
+input[type=range]{-webkit-appearance:none;width:100%;height:34px;background:transparent;margin:6px 0 0}
+input[type=range]::-webkit-slider-runnable-track{height:8px;border-radius:99px;
+  background:linear-gradient(90deg,var(--accent) var(--pct,50%),var(--line) var(--pct,50%))}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:30px;height:30px;border-radius:50%;
+  background:#fff;border:3px solid var(--accent);margin-top:-11px;box-shadow:0 2px 6px rgba(0,0,0,.4)}
+
+/* ---- nav ---- */
+.roundnav{display:grid;grid-template-columns:52px 1fr 52px;gap:8px;align-items:center;margin-bottom:14px}
+.roundnav .label{text-align:center;font-size:15px;font-weight:800}
+.roundnav .label small{display:block;font-size:12px;color:var(--dim);font-weight:600;margin-top:1px}
+
+/* ---- table ---- */
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+th{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;text-align:right;padding:0 0 8px;font-weight:700}
+th:nth-child(1),th:nth-child(2){text-align:left}
+td{padding:10px 0;border-top:1px solid var(--line);text-align:right;font-size:15px}
+td:nth-child(1){width:30px;text-align:left;color:var(--dim);font-weight:800}
+td:nth-child(2){text-align:left;font-weight:700;max-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+tr.me td:nth-child(2){color:var(--accent)}
+.pts{font-weight:800;font-size:17px}
+.diff.pos{color:var(--accent)} .diff.neg{color:var(--red)}
+.medal{font-size:15px}
+
+/* ---- round list ---- */
+.rl{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 0;border-top:1px solid var(--line);cursor:pointer}
+.rl:first-child{border-top:none}
+.rl .n{font-size:12px;font-weight:800;color:var(--dim);width:26px;flex:0 0 26px}
+.rl .m{flex:1;min-width:0;font-size:13px;line-height:1.35;color:var(--dim)}
+.rl .m b{color:var(--text);font-weight:700}
+.rl .st{font-size:12px;font-weight:800;color:var(--accent);flex:0 0 auto}
+.rl .st.todo{color:var(--dim)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--safe-b) + 22px);
+  background:var(--accent);color:#04231c;padding:12px 20px;border-radius:99px;font-weight:800;font-size:14px;
+  z-index:50;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.show{opacity:1}
+.spacer{height:8px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ============ SETUP ============ -->
+  <section id="view-setup">
+    <div class="topbar">
+      <div>
+        <h1>Padel Americano</h1>
+        <div class="sub">8 pelaajaa · 2 kenttää · 7 kierrosta</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Pelaajat</h2>
+      <div id="nameinputs"></div>
+    </div>
+
+    <div class="card">
+      <h2>Pisteet per ottelu</h2>
+      <div class="chips" id="targetchips"></div>
+    </div>
+
+    <button class="btn" id="startBtn">Aloita turnaus</button>
+    <div class="spacer"></div>
+    <p style="font-size:12.5px;color:var(--dim);text-align:center;line-height:1.5;margin:6px 0 0">
+      Jokainen pelaa jokaisen kanssa parina tasan kerran<br>ja jokaista vastaan tasan kahdesti.
+    </p>
+  </section>
+
+  <!-- ============ PLAY ============ -->
+  <section id="view-play" class="hidden">
+    <div class="topbar">
+      <div>
+        <h1>Americano</h1>
+        <div class="sub" id="playSub">Kierros 1 / 7</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="iconbtn" id="toStandings">Tilanne</button>
+        <button class="iconbtn" id="toRounds">Kierrokset</button>
+      </div>
+    </div>
+
+    <div class="roundnav">
+      <button class="iconbtn" id="prevRound" style="padding:12px 0">‹</button>
+      <div class="label" id="roundLabel">Kierros 1 / 7<small>Kirjaa tulokset</small></div>
+      <button class="iconbtn" id="nextRound" style="padding:12px 0">›</button>
+    </div>
+
+    <div id="courts"></div>
+
+    <button class="btn" id="confirmBtn">Tallenna ja seuraava kierros</button>
+    <div class="spacer"></div>
+  </section>
+
+  <!-- ============ STANDINGS ============ -->
+  <section id="view-standings" class="hidden">
+    <div class="topbar">
+      <div>
+        <h1 id="standTitle">Tilanne</h1>
+        <div class="sub" id="standSub"></div>
+      </div>
+      <button class="iconbtn" id="standBack">Takaisin</button>
+    </div>
+
+    <div class="card">
+      <table>
+        <thead><tr><th>#</th><th>Pelaaja</th><th>Ottelut</th><th>+/−</th><th>Pisteet</th></tr></thead>
+        <tbody id="standBody"></tbody>
+      </table>
+    </div>
+
+    <button class="btn danger" id="resetBtn">Nollaa turnaus</button>
+    <div class="spacer"></div>
+  </section>
+
+  <!-- ============ ROUNDS ============ -->
+  <section id="view-rounds" class="hidden">
+    <div class="topbar">
+      <div>
+        <h1>Kierrokset</h1>
+        <div class="sub">Napauta kierrosta muokataksesi</div>
+      </div>
+      <button class="iconbtn" id="roundsBack">Takaisin</button>
+    </div>
+    <div class="card" id="roundList"></div>
+    <div class="spacer"></div>
+  </section>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+
+/* ------------------------------------------------------------------
+   AIKATAULU — todennettu whist-turnaus Wh(8).
+   7 kierrosta x 2 kenttää. Indeksit 0..7 viittaavat pelaajalistaan.
+   Ominaisuudet (varmistettu laskennallisesti):
+     · kaikki 28 paria esiintyvät parina täsmälleen kerran
+     · jokainen pelaajapari kohtaa vastustajana täsmälleen kahdesti
+   Muoto: rounds[r][court] = [[p1,p2],[p3,p4]]  (joukkue A vs joukkue B)
+------------------------------------------------------------------- */
+const SCHEDULE = [
+  [[[7,0],[1,5]], [[2,3],[4,6]]],
+  [[[7,1],[2,6]], [[3,4],[5,0]]],
+  [[[7,2],[3,0]], [[4,5],[6,1]]],
+  [[[7,3],[4,1]], [[5,6],[0,2]]],
+  [[[7,4],[5,2]], [[6,0],[1,3]]],
+  [[[7,5],[6,3]], [[0,1],[2,4]]],
+  [[[7,6],[0,4]], [[1,2],[3,5]]]
+];
+const ROUNDS = SCHEDULE.length;   // 7
+const COURTS = 2;
+const KEY = "padel-americano-8";
+
+const TARGET_OPTIONS = [16, 21, 24, 32];
+
+/* ---------------- tila ---------------- */
+let S = null;
+
+function freshState(names, target){
+  return {
+    names, target,
+    round: 0,
+    // scores[r][c] = [a,b]  tai null jos ei kirjattu
+    scores: Array.from({length:ROUNDS}, () => Array.from({length:COURTS}, () => null)),
+    // työn alla oleva syöttö (ei vielä tallennettu): draft[c] = a-joukkueen pisteet
+    done: false
+  };
+}
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
+function load(){
+  try{
+    const raw = localStorage.getItem(KEY);
+    if(!raw) return null;
+    const s = JSON.parse(raw);
+    if(!s || !Array.isArray(s.names) || s.names.length!==8) return null;
+    if(!Array.isArray(s.scores) || s.scores.length!==ROUNDS) return null;
+    return s;
+  }catch(e){ return null; }
+}
+
+/* ---------------- apurit ---------------- */
+const $  = id => document.getElementById(id);
+const el = (tag, cls, txt) => { const n=document.createElement(tag); if(cls)n.className=cls; if(txt!=null)n.textContent=txt; return n; };
+
+let toastTimer=null;
+function toast(msg){
+  const t=$("toast"); t.textContent=msg; t.classList.add("show");
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove("show"),1600);
+}
+function show(view){
+  ["setup","play","standings","rounds"].forEach(v=>$("view-"+v).classList.toggle("hidden", v!==view));
+  window.scrollTo(0,0);
+}
+
+/* ---------------- pistelasku ---------------- */
+function standings(){
+  const rows = S.names.map((name,i)=>({i,name,pts:0,diff:0,played:0}));
+  S.scores.forEach((round,r)=>{
+    round.forEach((sc,c)=>{
+      if(!sc) return;
+      const [teamA, teamB] = SCHEDULE[r][c];
+      const [a,b] = sc;
+      teamA.forEach(p=>{ rows[p].pts+=a; rows[p].diff+=a-b; rows[p].played++; });
+      teamB.forEach(p=>{ rows[p].pts+=b; rows[p].diff+=b-a; rows[p].played++; });
+    });
+  });
+  rows.sort((x,y)=> y.pts-x.pts || y.diff-x.diff || x.name.localeCompare(y.name,"fi"));
+  return rows;
+}
+function playedRounds(){
+  return S.scores.filter(r=>r.every(c=>c!==null)).length;
+}
+function allDone(){
+  return S.scores.every(r=>r.every(c=>c!==null));
+}
+
+/* ---------------- SETUP-näkymä ---------------- */
+function buildSetup(){
+  const box = $("nameinputs"); box.innerHTML="";
+  for(let i=0;i<8;i++){
+    const row = el("div","namerow");
+    row.appendChild(el("div","num",String(i+1)));
+    const inp = el("input"); inp.type="text"; inp.id="name"+i;
+    inp.placeholder = "Pelaaja "+(i+1);
+    inp.autocomplete="off"; inp.autocapitalize="words"; inp.spellcheck=false;
+    inp.maxLength = 16;
+    inp.addEventListener("keydown", e=>{
+      if(e.key==="Enter"){ e.preventDefault(); const nx=$("name"+(i+1)); if(nx) nx.focus(); else inp.blur(); }
+    });
+    row.appendChild(inp);
+    box.appendChild(row);
+  }
+  const chips = $("targetchips"); chips.innerHTML="";
+  TARGET_OPTIONS.forEach(t=>{
+    const c = el("div","chip"+(t===24?" on":""), String(t));
+    c.dataset.t = t;
+    c.addEventListener("click", ()=>{
+      chips.querySelectorAll(".chip").forEach(x=>x.classList.remove("on"));
+      c.classList.add("on");
+    });
+    chips.appendChild(c);
+  });
+}
+$("startBtn") && $("startBtn").addEventListener("click", ()=>{
+  const names=[];
+  for(let i=0;i<8;i++){
+    const v = ($("name"+i).value||"").trim();
+    names.push(v || ("Pelaaja "+(i+1)));
+  }
+  const on = $("targetchips").querySelector(".chip.on");
+  const target = on ? parseInt(on.dataset.t,10) : 24;
+  S = freshState(names, target);
+  save(); renderPlay(); show("play");
+});
+
+/* ---------------- PLAY-näkymä ---------------- */
+function renderPlay(){
+  const r = S.round;
+  $("playSub").textContent = "Kierros "+(r+1)+" / "+ROUNDS+" · "+S.target+" pistettä";
+  const done = S.scores[r].every(c=>c!==null);
+  $("roundLabel").innerHTML = "Kierros "+(r+1)+" / "+ROUNDS+
+    "<small>"+(done ? "Tulokset kirjattu" : "Kirjaa tulokset")+"</small>";
+  $("prevRound").disabled = (r===0);
+  $("nextRound").disabled = (r===ROUNDS-1);
+  $("prevRound").style.opacity = r===0 ? .35 : 1;
+  $("nextRound").style.opacity = r===ROUNDS-1 ? .35 : 1;
+
+  const wrap = $("courts"); wrap.innerHTML="";
+  SCHEDULE[r].forEach((match,c)=> wrap.appendChild(courtCard(r,c,match)));
+
+  const last = (r===ROUNDS-1);
+  $("confirmBtn").textContent = last ? "Tallenna ja näytä lopputulokset"
+                                     : "Tallenna ja seuraava kierros";
+}
+
+function courtCard(r, c, match){
+  const [teamA, teamB] = match;
+  const card = el("div","court");
+  card.appendChild(el("div","courtname","Kenttä "+(c+1)));
+
+  const teams = el("div","teams");
+  const tA = el("div","team"), pA = el("div","players");
+  teamA.forEach(p=>pA.appendChild(el("span",null,S.names[p])));
+  tA.appendChild(pA);
+  const tB = el("div","team",""), pB = el("div","players");
+  pB.style.textAlign="right";
+  teamB.forEach(p=>pB.appendChild(el("span",null,S.names[p])));
+  tB.appendChild(pB);
+  teams.appendChild(tA); teams.appendChild(el("div","vs","VS")); teams.appendChild(tB);
+  card.appendChild(teams);
+
+  // nykyinen arvo: tallennettu tai puoliväli
+  const saved = S.scores[r][c];
+  let a = saved ? saved[0] : Math.floor(S.target/2);
+
+  const scores = el("div","scores");
+  const boxA = el("div","scorebox"), valA = el("div","val");
+  const boxB = el("div","scorebox"), valB = el("div","val");
+  boxA.appendChild(valA); boxB.appendChild(valB);
+  scores.appendChild(boxA); scores.appendChild(el("div","dash","–")); scores.appendChild(boxB);
+  card.appendChild(scores);
+
+  const slider = el("input"); slider.type="range"; slider.min=0; slider.max=S.target; slider.step=1;
+  card.appendChild(slider);
+
+  const hint = el("div", null, "Liu'uta tai näpäytä — vasemman joukkueen pisteet");
+  hint.style.cssText = "font-size:11px;color:var(--dim);text-align:center;margin:2px 0 6px";
+  card.appendChild(hint);
+
+  const steps = el("div","steppers");
+  const minus = el("button","stepbtn","−");
+  const plus  = el("button","stepbtn","+");
+  steps.appendChild(minus); steps.appendChild(plus);
+  card.appendChild(steps);
+
+  function paint(){
+    const b = S.target - a;
+    valA.textContent = a; valB.textContent = b;
+    boxA.classList.toggle("win", a>b); boxB.classList.toggle("win", b>a);
+    slider.value = a;
+    slider.style.setProperty("--pct", (a/S.target*100)+"%");
+    card.dataset.a = a;
+  }
+  slider.addEventListener("input", ()=>{ a = parseInt(slider.value,10); paint(); });
+  minus.addEventListener("click", ()=>{ a=Math.max(0,a-1); paint(); });
+  plus .addEventListener("click", ()=>{ a=Math.min(S.target,a+1); paint(); });
+  paint();
+  return card;
+}
+
+$("confirmBtn").addEventListener("click", ()=>{
+  const cards = $("courts").children;
+  for(let c=0;c<COURTS;c++){
+    const a = parseInt(cards[c].dataset.a,10);
+    S.scores[S.round][c] = [a, S.target-a];
+  }
+  save();
+  if(S.round < ROUNDS-1){
+    S.round++; save(); renderPlay();
+    toast("Kierros "+S.round+" tallennettu");
+  }else{
+    S.done = true; save(); renderStandings(); show("standings");
+  }
+});
+$("prevRound").addEventListener("click", ()=>{ if(S.round>0){ S.round--; save(); renderPlay(); } });
+$("nextRound").addEventListener("click", ()=>{ if(S.round<ROUNDS-1){ S.round++; save(); renderPlay(); } });
+$("toStandings").addEventListener("click", ()=>{ renderStandings(); show("standings"); });
+$("toRounds").addEventListener("click", ()=>{ renderRounds(); show("rounds"); });
+
+/* ---------------- STANDINGS ---------------- */
+function renderStandings(){
+  const rows = standings();
+  const pr = playedRounds();
+  const fin = allDone();
+  $("standTitle").textContent = fin ? "Lopputulokset" : "Tilanne";
+  $("standSub").textContent = pr+" / "+ROUNDS+" kierrosta pelattu";
+  const tb = $("standBody"); tb.innerHTML="";
+  const medals = ["🥇","🥈","🥉"];
+  // tasapisteissä (sama pistemäärä JA sama +/−) jaettu sija
+  const ranks = [];
+  rows.forEach((r,idx)=>{
+    if(idx>0 && rows[idx-1].pts===r.pts && rows[idx-1].diff===r.diff) ranks[idx]=ranks[idx-1];
+    else ranks[idx]=idx+1;
+  });
+  rows.forEach((r,idx)=>{
+    const tr = el("tr");
+    const rank = ranks[idx];
+    tr.appendChild(el("td", null, fin && rank<=3 ? medals[rank-1] : String(rank)));
+    tr.appendChild(el("td", null, r.name));
+    tr.appendChild(el("td", null, String(r.played)));
+    const d = el("td","diff "+(r.diff>0?"pos":r.diff<0?"neg":""), (r.diff>0?"+":"")+r.diff);
+    tr.appendChild(d);
+    tr.appendChild(el("td","pts", String(r.pts)));
+    tb.appendChild(tr);
+  });
+}
+$("standBack").addEventListener("click", ()=>{ renderPlay(); show("play"); });
+$("resetBtn").addEventListener("click", ()=>{
+  if(confirm("Nollataanko turnaus? Kaikki tulokset ja nimet häviävät.")){
+    localStorage.removeItem(KEY); S=null;
+    buildSetup(); show("setup");
+  }
+});
+
+/* ---------------- ROUNDS ---------------- */
+function renderRounds(){
+  const list = $("roundList"); list.innerHTML="";
+  SCHEDULE.forEach((round,r)=>{
+    const row = el("div","rl");
+    row.appendChild(el("div","n","K"+(r+1)));
+    const m = el("div","m");
+    round.forEach((match,c)=>{
+      const [tA,tB] = match, sc = S.scores[r][c];
+      const line = el("div");
+      const nA = tA.map(p=>S.names[p]).join(" & ");
+      const nB = tB.map(p=>S.names[p]).join(" & ");
+      if(sc){
+        line.innerHTML = nA+" <b>"+sc[0]+"–"+sc[1]+"</b> "+nB;
+      }else{
+        line.textContent = nA+" vs "+nB;
+      }
+      m.appendChild(line);
+    });
+    row.appendChild(m);
+    const played = round.every((_,c)=>S.scores[r][c]!==null);
+    row.appendChild(el("div","st"+(played?"":" todo"), played?"✓":"–"));
+    row.addEventListener("click", ()=>{ S.round=r; save(); renderPlay(); show("play"); });
+    list.appendChild(row);
+  });
+}
+$("roundsBack").addEventListener("click", ()=>{ renderPlay(); show("play"); });
+
+/* ---------------- offline ---------------- */
+// Rekisteröityy vain https:llä (Vercel). file://-testauksessa ohitetaan hiljaisesti.
+if ("serviceWorker" in navigator && location.protocol === "https:") {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js").catch(()=>{});
+  });
+}
+
+/* ---------------- käynnistys ---------------- */
+(function init(){
+  buildSetup();
+  const saved = load();
+  if(saved){
+    S = saved;
+    if(S.done && allDone()){ renderStandings(); show("standings"); }
+    else { renderPlay(); show("play"); }
+  }else{
+    show("setup");
+  }
+})();
+</script>
+</body>
+</html>
