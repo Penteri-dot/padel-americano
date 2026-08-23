@@ -116,6 +116,12 @@ tr.me td:nth-child(2){color:var(--accent)}
   z-index:50;opacity:0;transition:opacity .2s;pointer-events:none}
 .toast.show{opacity:1}
 .spacer{height:8px}
+
+/* ---- vientikentta (nakyy vain jos leikepoydalle kopiointi epaonnistuu) ---- */
+#exportBox{width:100%;height:190px;margin-top:10px;resize:vertical;
+  background:var(--card2);border:1px solid var(--line);color:var(--text);
+  border-radius:12px;padding:12px;font-size:13px;line-height:1.45;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre}
 </style>
 </head>
 <body>
@@ -189,6 +195,9 @@ tr.me td:nth-child(2){color:var(--accent)}
       </table>
     </div>
 
+    <button class="btn ghost" id="copyBtn">Kopioi tulokset</button>
+    <textarea id="exportBox" class="hidden" readonly></textarea>
+    <div class="spacer"></div>
     <button class="btn danger" id="resetBtn">Nollaa turnaus</button>
     <div class="spacer"></div>
   </section>
@@ -288,6 +297,16 @@ function standings(){
   });
   rows.sort((x,y)=> y.pts-x.pts || y.diff-x.diff || x.name.localeCompare(y.name,"fi"));
   return rows;
+}
+/* Jaettu sija kun seka pisteet etta +/- ovat samat.
+   Sama laskenta kaytossa seka taulukossa etta tekstiviennissa. */
+function ranksFor(rows){
+  const ranks = [];
+  rows.forEach((r,idx)=>{
+    if(idx>0 && rows[idx-1].pts===r.pts && rows[idx-1].diff===r.diff) ranks[idx]=ranks[idx-1];
+    else ranks[idx]=idx+1;
+  });
+  return ranks;
 }
 function playedRounds(){
   return S.scores.filter(r=>r.every(c=>c!==null)).length;
@@ -436,14 +455,10 @@ function renderStandings(){
   const fin = allDone();
   $("standTitle").textContent = fin ? "Lopputulokset" : "Tilanne";
   $("standSub").textContent = pr+" / "+ROUNDS+" kierrosta pelattu";
+  $("exportBox").classList.add("hidden");
   const tb = $("standBody"); tb.innerHTML="";
   const medals = ["🥇","🥈","🥉"];
-  // tasapisteissä (sama pistemäärä JA sama +/−) jaettu sija
-  const ranks = [];
-  rows.forEach((r,idx)=>{
-    if(idx>0 && rows[idx-1].pts===r.pts && rows[idx-1].diff===r.diff) ranks[idx]=ranks[idx-1];
-    else ranks[idx]=idx+1;
-  });
+  const ranks = ranksFor(rows);
   rows.forEach((r,idx)=>{
     const tr = el("tr");
     const rank = ranks[idx];
@@ -456,6 +471,89 @@ function renderStandings(){
     tb.appendChild(tr);
   });
 }
+/* ---------------- TULOSTEN VIENTI ---------------- */
+/* Muotoilu on tehty WhatsAppia varten: ei sarakekohdistusta, koska
+   viestisovellus renderoi suhteellisella fontilla ja valilyontirivitys hajoaisi. */
+function resultsText(){
+  const rows  = standings();
+  const ranks = ranksFor(rows);
+  const fin   = allDone();
+  const pr    = playedRounds();
+  const medals = ["\ud83e\udd47","\ud83e\udd48","\ud83e\udd49"];
+  const L = [];
+
+  L.push("\ud83c\udfbe PADEL AMERICANO");
+  L.push((fin ? "Lopputulokset" : "Tilanne") + " \u00b7 " + pr + "/" + ROUNDS +
+         " kierrosta \u00b7 " + S.target + " p/ottelu");
+  L.push("");
+  L.push("SIJOITUKSET");
+  rows.forEach((r,idx)=>{
+    const rank = ranks[idx];
+    const head = (fin && rank<=3) ? medals[rank-1] : (rank + ".");
+    const diff = (r.diff>0 ? "+" : "") + r.diff;
+    L.push(head + " " + r.name + " \u2014 " + r.pts + " p (" + diff + ")");
+  });
+
+  const playedRows = [];
+  SCHEDULE.forEach((round,r)=>{
+    round.forEach((match,c)=>{
+      const sc = S.scores[r][c];
+      if(!sc) return;
+      const [tA,tB] = match;
+      const nA = tA.map(i=>S.names[i]).join(" & ");
+      const nB = tB.map(i=>S.names[i]).join(" & ");
+      // kierrosnumero vain ensimmaiselle kentalle, loput sisennetaan
+      const lead = (playedRows.length && playedRows[playedRows.length-1].r===r)
+        ? "    " : ("K" + (r+1) + "  ");
+      playedRows.push({ r, line: lead + nA + " " + sc[0] + "\u2013" + sc[1] + " " + nB });
+    });
+  });
+  if(playedRows.length){
+    L.push("");
+    L.push("KIERROKSET");
+    playedRows.forEach(x=>L.push(x.line));
+  }
+  return L.join("\n");
+}
+
+/* Leikepoyta: moderni API vaatii suojatun kontekstin (https).
+   file://- ja http-testauksessa pudotaan execCommand-varareitille. */
+function copyToClipboard(text){
+  if(navigator.clipboard && navigator.clipboard.writeText && window.isSecureContext){
+    return navigator.clipboard.writeText(text);
+  }
+  return new Promise((resolve,reject)=>{
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.setAttribute("readonly","");
+    ta.style.cssText = "position:fixed;top:0;left:0;width:1px;height:1px;opacity:0";
+    document.body.appendChild(ta);
+    let ok = false;
+    try{
+      ta.select();
+      ta.setSelectionRange(0, text.length);   // iOS
+      ok = document.execCommand("copy");
+    }catch(e){ ok = false; }
+    document.body.removeChild(ta);
+    ok ? resolve() : reject(new Error("execCommand copy failed"));
+  });
+}
+
+$("copyBtn").addEventListener("click", ()=>{
+  const text = resultsText();
+  const box  = $("exportBox");
+  copyToClipboard(text).then(()=>{
+    box.classList.add("hidden");
+    toast("Tulokset kopioitu");
+  }).catch(()=>{
+    // Viimeinen oljenkorsi: nayta teksti valmiiksi valittuna kasin kopioitavaksi.
+    box.value = text;
+    box.classList.remove("hidden");
+    box.focus(); box.select();
+    toast("Kopioi teksti kasin");
+  });
+});
+
 $("standBack").addEventListener("click", ()=>{ renderPlay(); show("play"); });
 $("resetBtn").addEventListener("click", ()=>{
   if(confirm("Nollataanko turnaus? Kaikki tulokset ja nimet häviävät.")){

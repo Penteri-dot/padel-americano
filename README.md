@@ -42,6 +42,9 @@ verkkoyhteyttä sen jälkeen kun olet avannut sen kerran.
   oikean joukkueen pisteet täydentyvät automaattisesti (summa = 24)
 - **Tallenna ja seuraava kierros**
 - **Tilanne** = elävä pistetilanne, **Kierrokset** = koko aikataulu, napauta muokataksesi
+- **Kopioi tulokset** (Tilanne-näkymässä) = sijoitukset ja tulokset leikepöydälle valmiiksi
+  muotoiltuna, liitettäväksi suoraan WhatsAppiin. Toimii myös kesken turnauksen — mukaan
+  tulevat vain pelatut kierrokset.
 - Tilanne tallentuu automaattisesti puhelimen muistiin — puhelimen voi lukita
   tai Safarin sulkea kesken turnauksen
 
