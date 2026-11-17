@@ -1,5 +1,5 @@
 /* Offline-tuki: appi latautuu välimuistista jos hallissa ei ole kenttää. */
-const CACHE = "americano-v2";
+const CACHE = "americano-v3";
 const ASSETS = ["./", "./index.html"];
 
 self.addEventListener("install", e => {

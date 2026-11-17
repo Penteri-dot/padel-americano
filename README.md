@@ -7,12 +7,27 @@ pyörittämiseen. Appi kertoo joka kierroksella, kuka pelaa kenen kanssa ja mill
 kentällä, kirjaa tulokset ja laskee pistetilanteen. Mitään ei tarvitse asentaa
 eikä mihinkään kirjautua: avaa linkki, syötä nimet ja aloita.
 
+- **Neljä kieltä: suomi, englanti, espanja ja ruotsi.** Appi valitsee kielen
+  puhelimen kielen mukaan, ja sen voi vaihtaa 🌐-valikosta aloitusnäkymässä
+  tai Tilanne-näkymän alareunassa.
 - Tulokset tallentuvat vain omaan puhelimeesi. Mitään ei lähetetä minnekään.
 - Toimii myös ilman verkkoa, kun olet avannut appin kerran.
 - Saa käyttää, kopioida ja muokata vapaasti (MIT-lisenssi, ks. `LICENSE`).
 
-*In English: a free, install-free phone web app for running an 8-player,
-2-court padel americano tournament. The interface is in Finnish.*
+## In English
+
+**Open the app: https://padel-americano-ten.vercel.app**
+
+A free phone web app for running an 8-player, 2-court padel americano
+tournament. It shows who plays with whom on which court each round, records
+the scores and keeps the standings. Nothing to install, no sign-up.
+
+- Available in **English, Spanish, Swedish and Finnish**. The app follows your
+  phone's language; change it from the 🌐 menu on the start screen.
+- Everyone partners with everyone exactly once and plays against everyone
+  exactly twice (7 rounds).
+- Scores are stored only on your own phone. Works offline after the first visit.
+- Free to use, copy and modify (MIT licence).
 
 ## Turnausmuoto
 
@@ -59,6 +74,9 @@ ensimmäinen avaus hakee uuden version taustalla, toinen näyttää sen.
   oikean joukkueen pisteet täydentyvät automaattisesti (summa = 24)
 - **Tallenna ja seuraava kierros**
 - Jos kentän pisteisiin ei ole koskettu, appi kysyy varmistuksen ennen tallennusta
+- Jos jokin kierros on jäänyt tallentamatta, Tilanne-näkymä kertoo mikä ja vie
+  sinne yhdellä napautuksella. Otsikoksi vaihtuu **Lopputulokset**, kun kaikki
+  7 kierrosta on tallennettu
 - **Tilanne** = elävä pistetilanne, **Kierrokset** = koko aikataulu, napauta muokataksesi
 - Tilanne ja keskeneräinen pistesyöttö tallentuvat automaattisesti puhelimen
   muistiin — puhelimen voi lukita tai Safarin sulkea kesken turnauksen

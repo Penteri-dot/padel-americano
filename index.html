@@ -116,6 +116,9 @@ tr.me td:nth-child(2){color:var(--accent)}
   z-index:50;opacity:0;transition:opacity .2s;pointer-events:none}
 .toast.show{opacity:1}
 .spacer{height:8px}
+select.langsel{-webkit-appearance:none;appearance:none;font-family:inherit;flex:0 0 auto}
+.missing{border-color:var(--gold)}
+.missing p{margin:0 0 10px;font-size:14px;font-weight:700;color:var(--gold)}
 </style>
 </head>
 <body>
@@ -126,23 +129,24 @@ tr.me td:nth-child(2){color:var(--accent)}
     <div class="topbar">
       <div>
         <h1>Padel Americano</h1>
-        <div class="sub">8 pelaajaa · 2 kenttää · 7 kierrosta</div>
+        <div class="sub" data-i18n="setupSub">8 pelaajaa · 2 kenttää · 7 kierrosta</div>
       </div>
+      <select class="iconbtn langsel" aria-label="Kieli / Language"></select>
     </div>
 
     <div class="card">
-      <h2>Pelaajat</h2>
+      <h2 data-i18n="players">Pelaajat</h2>
       <div id="nameinputs"></div>
     </div>
 
     <div class="card">
-      <h2>Pisteet per ottelu</h2>
+      <h2 data-i18n="pointsPerMatch">Pisteet per ottelu</h2>
       <div class="chips" id="targetchips"></div>
     </div>
 
-    <button class="btn" id="startBtn">Aloita turnaus</button>
+    <button class="btn" id="startBtn" data-i18n="start">Aloita turnaus</button>
     <div class="spacer"></div>
-    <p style="font-size:12.5px;color:var(--dim);text-align:center;line-height:1.5;margin:6px 0 0">
+    <p data-i18n-html="setupNote" style="font-size:12.5px;color:var(--dim);text-align:center;line-height:1.5;margin:6px 0 0">
       Jokainen pelaa jokaisen kanssa parina tasan kerran<br>ja jokaista vastaan tasan kahdesti.
     </p>
   </section>
@@ -155,8 +159,8 @@ tr.me td:nth-child(2){color:var(--accent)}
         <div class="sub" id="playSub">Kierros 1 / 7</div>
       </div>
       <div style="display:flex;gap:8px">
-        <button class="iconbtn" id="toStandings">Tilanne</button>
-        <button class="iconbtn" id="toRounds">Kierrokset</button>
+        <button class="iconbtn" id="toStandings" data-i18n="standings">Tilanne</button>
+        <button class="iconbtn" id="toRounds" data-i18n="rounds">Kierrokset</button>
       </div>
     </div>
 
@@ -179,28 +183,34 @@ tr.me td:nth-child(2){color:var(--accent)}
         <h1 id="standTitle">Tilanne</h1>
         <div class="sub" id="standSub"></div>
       </div>
-      <button class="iconbtn" id="standBack">Takaisin</button>
+      <button class="iconbtn" id="standBack" data-i18n="back">Takaisin</button>
+    </div>
+
+    <div class="card missing hidden" id="missingBox">
+      <p id="missingNote"></p>
+      <button class="btn" id="missingBtn"></button>
     </div>
 
     <div class="card">
       <table>
-        <thead><tr><th>#</th><th>Pelaaja</th><th>Ottelut</th><th>+/−</th><th>Pisteet</th></tr></thead>
+        <thead><tr><th>#</th><th data-i18n="thPlayer">Pelaaja</th><th data-i18n="thMatches">Ottelut</th><th>+/−</th><th data-i18n="thPoints">Pisteet</th></tr></thead>
         <tbody id="standBody"></tbody>
       </table>
     </div>
 
-    <button class="btn danger" id="resetBtn">Nollaa turnaus</button>
+    <button class="btn danger" id="resetBtn" data-i18n="reset">Nollaa turnaus</button>
     <div class="spacer"></div>
+    <div style="text-align:center;margin-top:8px"><select class="iconbtn langsel" aria-label="Kieli / Language"></select></div>
   </section>
 
   <!-- ============ ROUNDS ============ -->
   <section id="view-rounds" class="hidden">
     <div class="topbar">
       <div>
-        <h1>Kierrokset</h1>
-        <div class="sub">Napauta kierrosta muokataksesi</div>
+        <h1 data-i18n="rounds">Kierrokset</h1>
+        <div class="sub" data-i18n="roundsSub">Napauta kierrosta muokataksesi</div>
       </div>
-      <button class="iconbtn" id="roundsBack">Takaisin</button>
+      <button class="iconbtn" id="roundsBack" data-i18n="back">Takaisin</button>
     </div>
     <div class="card" id="roundList"></div>
     <div class="spacer"></div>
@@ -234,6 +244,81 @@ const COURTS = 2;
 const KEY = "padel-americano-8";
 
 const TARGET_OPTIONS = [16, 21, 24, 32];
+
+/* ---------------- kielet ---------------- */
+const LANGS = {fi:"Suomi", en:"English", es:"Español", sv:"Svenska"};
+const LANG_KEY = "padel-americano-lang";
+// {0}, {1}... korvataan t()-kutsun lisäargumenteilla.
+const T = {
+  setupSub:      {fi:"8 pelaajaa · 2 kenttää · 7 kierrosta", en:"8 players · 2 courts · 7 rounds", es:"8 jugadores · 2 pistas · 7 rondas", sv:"8 spelare · 2 banor · 7 omgångar"},
+  players:       {fi:"Pelaajat", en:"Players", es:"Jugadores", sv:"Spelare"},
+  pointsPerMatch:{fi:"Pisteet per ottelu", en:"Points per match", es:"Puntos por partido", sv:"Poäng per match"},
+  start:         {fi:"Aloita turnaus", en:"Start tournament", es:"Empezar torneo", sv:"Starta turneringen"},
+  setupNote:     {fi:"Jokainen pelaa jokaisen kanssa parina tasan kerran<br>ja jokaista vastaan tasan kahdesti.",
+                  en:"Everyone partners with everyone exactly once<br>and plays against everyone exactly twice.",
+                  es:"Cada jugador hace pareja con todos exactamente una vez<br>y juega contra todos exactamente dos veces.",
+                  sv:"Alla spelar ihop med alla exakt en gång<br>och mot alla exakt två gånger."},
+  playerN:       {fi:"Pelaaja {0}", en:"Player {0}", es:"Jugador {0}", sv:"Spelare {0}"},
+  standings:     {fi:"Tilanne", en:"Standings", es:"Clasificación", sv:"Ställning"},
+  rounds:        {fi:"Kierrokset", en:"Rounds", es:"Rondas", sv:"Omgångar"},
+  roundOf:       {fi:"Kierros {0} / {1}", en:"Round {0} / {1}", es:"Ronda {0} / {1}", sv:"Omgång {0} / {1}"},
+  roundAbbr:     {fi:"K", en:"R", es:"R", sv:"O"},
+  pointsN:       {fi:"{0} pistettä", en:"{0} points", es:"{0} puntos", sv:"{0} poäng"},
+  enter:         {fi:"Kirjaa tulokset", en:"Enter the scores", es:"Anota los resultados", sv:"Fyll i resultaten"},
+  entered:       {fi:"Tulokset kirjattu", en:"Scores saved", es:"Resultados guardados", sv:"Resultaten sparade"},
+  dirty:         {fi:"Muutoksia tallentamatta", en:"Unsaved changes", es:"Cambios sin guardar", sv:"Osparade ändringar"},
+  saveNext:      {fi:"Tallenna ja seuraava kierros", en:"Save and next round", es:"Guardar y siguiente ronda", sv:"Spara och nästa omgång"},
+  saveFinal:     {fi:"Tallenna ja näytä lopputulokset", en:"Save and show final results", es:"Guardar y ver resultados finales", sv:"Spara och visa slutresultat"},
+  court:         {fi:"Kenttä {0}", en:"Court {0}", es:"Pista {0}", sv:"Bana {0}"},
+  hint:          {fi:"Liu'uta tai näpäytä — vasemman joukkueen pisteet", en:"Slide or tap — left team's points", es:"Desliza o toca — puntos del equipo izquierdo", sv:"Dra eller tryck — vänstra lagets poäng"},
+  untouched:     {fi:"{0}: pisteitä ei ole muutettu ({1}). Tallennetaanko silti?", en:"{0}: the score has not been changed ({1}). Save anyway?", es:"{0}: no se ha cambiado el marcador ({1}). ¿Guardar igualmente?", sv:"{0}: poängen har inte ändrats ({1}). Spara ändå?"},
+  and:           {fi:" ja ", en:" and ", es:" y ", sv:" och "},
+  roundSaved:    {fi:"Kierros {0} tallennettu", en:"Round {0} saved", es:"Ronda {0} guardada", sv:"Omgång {0} sparad"},
+  roundMissing:  {fi:"Kierros {0} puuttuu vielä", en:"Round {0} is still missing", es:"Aún falta la ronda {0}", sv:"Omgång {0} saknas ännu"},
+  finalTitle:    {fi:"Lopputulokset", en:"Final results", es:"Resultados finales", sv:"Slutresultat"},
+  roundsPlayed:  {fi:"{0} / {1} kierrosta pelattu", en:"{0} / {1} rounds played", es:"{0} / {1} rondas jugadas", sv:"{0} / {1} omgångar spelade"},
+  notSaved:      {fi:"Tallentamatta: kierros {0}", en:"Not saved yet: round {0}", es:"Sin guardar: ronda {0}", sv:"Inte sparad: omgång {0}"},
+  enterRound:    {fi:"Kirjaa kierros {0}", en:"Enter round {0}", es:"Anotar ronda {0}", sv:"Fyll i omgång {0}"},
+  back:          {fi:"Takaisin", en:"Back", es:"Volver", sv:"Tillbaka"},
+  thPlayer:      {fi:"Pelaaja", en:"Player", es:"Jugador", sv:"Spelare"},
+  thMatches:     {fi:"Ottelut", en:"Matches", es:"Partidos", sv:"Matcher"},
+  thPoints:      {fi:"Pisteet", en:"Points", es:"Puntos", sv:"Poäng"},
+  reset:         {fi:"Nollaa turnaus", en:"Reset tournament", es:"Reiniciar torneo", sv:"Nollställ turneringen"},
+  resetConfirm:  {fi:"Nollataanko turnaus? Kaikki tulokset ja nimet häviävät.", en:"Reset the tournament? All scores and names will be lost.", es:"¿Reiniciar el torneo? Se perderán todos los resultados y nombres.", sv:"Nollställa turneringen? Alla resultat och namn försvinner."},
+  roundsSub:     {fi:"Napauta kierrosta muokataksesi", en:"Tap a round to edit it", es:"Toca una ronda para editarla", sv:"Tryck på en omgång för att ändra"}
+};
+function detectLang(){
+  try{ const v = localStorage.getItem(LANG_KEY); if(LANGS[v]) return v; }catch(e){}
+  const n = (navigator.language||"en").slice(0,2).toLowerCase();
+  return LANGS[n] ? n : "en";   // muut kielet saavat englannin
+}
+let LANG = detectLang();
+function t(key, ...args){
+  return T[key][LANG].replace(/\{(\d)\}/g, (_,i)=>args[i]);
+}
+function applyStatic(){
+  document.documentElement.lang = LANG;
+  document.querySelectorAll("[data-i18n]").forEach(n=>{ n.textContent = t(n.dataset.i18n); });
+  document.querySelectorAll("[data-i18n-html]").forEach(n=>{ n.innerHTML = t(n.dataset.i18nHtml); });
+  document.querySelectorAll(".langsel").forEach(sel=>{ sel.value = LANG; });
+}
+function setLang(l){
+  LANG = l;
+  try{ localStorage.setItem(LANG_KEY, l); }catch(e){}
+  applyStatic();
+  // päivitä näkyvissä oleva näkymä; kirjoitetut nimet ja tulokset säilyvät
+  for(let i=0;i<8;i++){ const inp=$("name"+i); if(inp) inp.placeholder = t("playerN", i+1); }
+  if(!S) return;
+  if(VIEW==="play") renderPlay();
+  else if(VIEW==="standings") renderStandings();
+  else if(VIEW==="rounds") renderRounds();
+}
+function buildLangPickers(){
+  document.querySelectorAll(".langsel").forEach(sel=>{
+    Object.keys(LANGS).forEach(l=>{ const o=el("option",null,"🌐 "+LANGS[l]); o.value=l; sel.appendChild(o); });
+    sel.addEventListener("change", ()=>setLang(sel.value));
+  });
+}
 
 /* ---------------- tila ---------------- */
 let S = null;
@@ -271,7 +356,9 @@ function toast(msg){
   const t=$("toast"); t.textContent=msg; t.classList.add("show");
   clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove("show"),1600);
 }
+let VIEW = "setup";
 function show(view){
+  VIEW = view;
   ["setup","play","standings","rounds"].forEach(v=>$("view-"+v).classList.toggle("hidden", v!==view));
   window.scrollTo(0,0);
 }
@@ -288,7 +375,7 @@ function standings(){
       teamB.forEach(p=>{ rows[p].pts+=b; rows[p].diff+=b-a; rows[p].played++; });
     });
   });
-  rows.sort((x,y)=> y.pts-x.pts || y.diff-x.diff || x.name.localeCompare(y.name,"fi"));
+  rows.sort((x,y)=> y.pts-x.pts || y.diff-x.diff || x.name.localeCompare(y.name,LANG));
   return rows;
 }
 function playedRounds(){
@@ -296,6 +383,11 @@ function playedRounds(){
 }
 function allDone(){
   return S.scores.every(r=>r.every(c=>c!==null));
+}
+// kierrokset (0-pohjaiset), joilta puuttuu tulos
+function missingRounds(){
+  const out=[]; S.scores.forEach((r,i)=>{ if(!r.every(c=>c!==null)) out.push(i); });
+  return out;
 }
 
 /* ---------------- SETUP-näkymä ---------------- */
@@ -305,7 +397,7 @@ function buildSetup(){
     const row = el("div","namerow");
     row.appendChild(el("div","num",String(i+1)));
     const inp = el("input"); inp.type="text"; inp.id="name"+i;
-    inp.placeholder = "Pelaaja "+(i+1);
+    inp.placeholder = t("playerN", i+1);
     inp.autocomplete="off"; inp.autocapitalize="words"; inp.spellcheck=false;
     inp.maxLength = 16;
     inp.addEventListener("keydown", e=>{
@@ -329,7 +421,7 @@ $("startBtn") && $("startBtn").addEventListener("click", ()=>{
   const names=[];
   for(let i=0;i<8;i++){
     const v = ($("name"+i).value||"").trim();
-    names.push(v || ("Pelaaja "+(i+1)));
+    names.push(v || t("playerN", i+1));
   }
   const on = $("targetchips").querySelector(".chip.on");
   const target = on ? parseInt(on.dataset.t,10) : 24;
@@ -340,7 +432,7 @@ $("startBtn") && $("startBtn").addEventListener("click", ()=>{
 /* ---------------- PLAY-näkymä ---------------- */
 function renderPlay(){
   const r = S.round;
-  $("playSub").textContent = "Kierros "+(r+1)+" / "+ROUNDS+" · "+S.target+" pistettä";
+  $("playSub").textContent = t("roundOf", r+1, ROUNDS)+" · "+t("pointsN", S.target);
   paintRoundLabel();
   $("prevRound").disabled = (r===0);
   $("nextRound").disabled = (r===ROUNDS-1);
@@ -351,22 +443,21 @@ function renderPlay(){
   SCHEDULE[r].forEach((match,c)=> wrap.appendChild(courtCard(r,c,match)));
 
   const last = (r===ROUNDS-1);
-  $("confirmBtn").textContent = last ? "Tallenna ja näytä lopputulokset"
-                                     : "Tallenna ja seuraava kierros";
+  $("confirmBtn").textContent = t(last ? "saveFinal" : "saveNext");
 }
 
 function paintRoundLabel(){
   const r = S.round;
   const done = S.scores[r].every(c=>c!==null);
   const dirty = done && S.scores[r].some((_,c)=>S.drafts[r+"-"+c]!=null);
-  $("roundLabel").innerHTML = "Kierros "+(r+1)+" / "+ROUNDS+
-    "<small>"+(dirty ? "Muutoksia tallentamatta" : done ? "Tulokset kirjattu" : "Kirjaa tulokset")+"</small>";
+  $("roundLabel").innerHTML = t("roundOf", r+1, ROUNDS)+
+    "<small>"+t(dirty ? "dirty" : done ? "entered" : "enter")+"</small>";
 }
 
 function courtCard(r, c, match){
   const [teamA, teamB] = match;
   const card = el("div","court");
-  card.appendChild(el("div","courtname","Kenttä "+(c+1)));
+  card.appendChild(el("div","courtname",t("court", c+1)));
 
   const teams = el("div","teams");
   const tA = el("div","team"), pA = el("div","players");
@@ -402,7 +493,7 @@ function courtCard(r, c, match){
   const slider = el("input"); slider.type="range"; slider.min=0; slider.max=S.target; slider.step=1;
   card.appendChild(slider);
 
-  const hint = el("div", null, "Liu'uta tai näpäytä — vasemman joukkueen pisteet");
+  const hint = el("div", null, t("hint"));
   hint.style.cssText = "font-size:11px;color:var(--dim);text-align:center;margin:2px 0 6px";
   card.appendChild(hint);
 
@@ -434,8 +525,8 @@ $("confirmBtn").addEventListener("click", ()=>{
   for(let c=0;c<COURTS;c++) if(!cards[c].dataset.touched) untouched.push(c);
   if(untouched.length){
     const a0 = parseInt(cards[untouched[0]].dataset.a,10);
-    const which = untouched.map(c=>"Kenttä "+(c+1)).join(" ja ");
-    if(!confirm(which+": pisteitä ei ole muutettu ("+a0+"–"+(S.target-a0)+"). Tallennetaanko silti?")) return;
+    const which = untouched.map(c=>t("court", c+1)).join(t("and"));
+    if(!confirm(t("untouched", which, a0+"–"+(S.target-a0)))) return;
   }
   for(let c=0;c<COURTS;c++){
     const a = parseInt(cards[c].dataset.a,10);
@@ -443,11 +534,17 @@ $("confirmBtn").addEventListener("click", ()=>{
     delete S.drafts[S.round+"-"+c];
   }
   save();
-  if(S.round < ROUNDS-1){
-    S.round++; save(); renderPlay();
-    toast("Kierros "+S.round+" tallennettu");
-  }else{
+  const miss = missingRounds();
+  if(!miss.length){
+    // kaikki kierrokset kirjattu: turnaus on valmis, mistä kierroksesta tahansa tallennettiin
     S.done = true; save(); renderStandings(); show("standings");
+  }else if(S.round < ROUNDS-1){
+    S.round++; save(); renderPlay();
+    toast(t("roundSaved", S.round));
+  }else{
+    // viimeinen kierros tallennettu, mutta jokin aiempi jäi väliin: vie sinne
+    S.round = miss[0]; save(); renderPlay(); window.scrollTo(0,0);
+    toast(t("roundMissing", miss[0]+1));
   }
 });
 $("prevRound").addEventListener("click", ()=>{ if(S.round>0){ S.round--; save(); renderPlay(); } });
@@ -460,8 +557,17 @@ function renderStandings(){
   const rows = standings();
   const pr = playedRounds();
   const fin = allDone();
-  $("standTitle").textContent = fin ? "Lopputulokset" : "Tilanne";
-  $("standSub").textContent = pr+" / "+ROUNDS+" kierrosta pelattu";
+  $("standTitle").textContent = t(fin ? "finalTitle" : "standings");
+  $("standSub").textContent = t("roundsPlayed", pr, ROUNDS);
+  // Loppuvaiheessa kerrotaan selvästi, mikä kierros on vielä tallentamatta.
+  const miss = missingRounds();
+  const nearEnd = miss.length>0 && (S.round===ROUNDS-1 || miss.length<=1);
+  $("missingBox").classList.toggle("hidden", !nearEnd);
+  if(nearEnd){
+    $("missingNote").textContent = t("notSaved", miss.map(i=>i+1).join(", "));
+    $("missingBtn").textContent = t("enterRound", miss[0]+1);
+    $("missingBtn").onclick = ()=>{ S.round = miss[0]; save(); renderPlay(); show("play"); };
+  }
   const tb = $("standBody"); tb.innerHTML="";
   const medals = ["🥇","🥈","🥉"];
   // tasapisteissä (sama pistemäärä JA sama +/−) jaettu sija
@@ -484,7 +590,7 @@ function renderStandings(){
 }
 $("standBack").addEventListener("click", ()=>{ renderPlay(); show("play"); });
 $("resetBtn").addEventListener("click", ()=>{
-  if(confirm("Nollataanko turnaus? Kaikki tulokset ja nimet häviävät.")){
+  if(confirm(t("resetConfirm"))){
     localStorage.removeItem(KEY); S=null;
     buildSetup(); show("setup");
   }
@@ -495,7 +601,7 @@ function renderRounds(){
   const list = $("roundList"); list.innerHTML="";
   SCHEDULE.forEach((round,r)=>{
     const row = el("div","rl");
-    row.appendChild(el("div","n","K"+(r+1)));
+    row.appendChild(el("div","n",t("roundAbbr")+(r+1)));
     const m = el("div","m");
     round.forEach((match,c)=>{
       const [tA,tB] = match, sc = S.scores[r][c];
@@ -528,6 +634,7 @@ if ("serviceWorker" in navigator && location.protocol === "https:") {
 
 /* ---------------- käynnistys ---------------- */
 (function init(){
+  buildLangPickers(); applyStatic();
   buildSetup();
   const saved = load();
   if(saved){
