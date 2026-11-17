@@ -244,7 +244,8 @@ function freshState(names, target){
     round: 0,
     // scores[r][c] = [a,b]  tai null jos ei kirjattu
     scores: Array.from({length:ROUNDS}, () => Array.from({length:COURTS}, () => null)),
-    // työn alla oleva syöttö (ei vielä tallennettu): draft[c] = a-joukkueen pisteet
+    // työn alla oleva syöttö (ei vielä tallennettu): drafts["r-c"] = a-joukkueen pisteet
+    drafts: {},
     done: false
   };
 }
@@ -256,6 +257,7 @@ function load(){
     const s = JSON.parse(raw);
     if(!s || !Array.isArray(s.names) || s.names.length!==8) return null;
     if(!Array.isArray(s.scores) || s.scores.length!==ROUNDS) return null;
+    if(!s.drafts || typeof s.drafts!=="object") s.drafts = {};
     return s;
   }catch(e){ return null; }
 }
@@ -339,9 +341,7 @@ $("startBtn") && $("startBtn").addEventListener("click", ()=>{
 function renderPlay(){
   const r = S.round;
   $("playSub").textContent = "Kierros "+(r+1)+" / "+ROUNDS+" · "+S.target+" pistettä";
-  const done = S.scores[r].every(c=>c!==null);
-  $("roundLabel").innerHTML = "Kierros "+(r+1)+" / "+ROUNDS+
-    "<small>"+(done ? "Tulokset kirjattu" : "Kirjaa tulokset")+"</small>";
+  paintRoundLabel();
   $("prevRound").disabled = (r===0);
   $("nextRound").disabled = (r===ROUNDS-1);
   $("prevRound").style.opacity = r===0 ? .35 : 1;
@@ -353,6 +353,14 @@ function renderPlay(){
   const last = (r===ROUNDS-1);
   $("confirmBtn").textContent = last ? "Tallenna ja näytä lopputulokset"
                                      : "Tallenna ja seuraava kierros";
+}
+
+function paintRoundLabel(){
+  const r = S.round;
+  const done = S.scores[r].every(c=>c!==null);
+  const dirty = done && S.scores[r].some((_,c)=>S.drafts[r+"-"+c]!=null);
+  $("roundLabel").innerHTML = "Kierros "+(r+1)+" / "+ROUNDS+
+    "<small>"+(dirty ? "Muutoksia tallentamatta" : done ? "Tulokset kirjattu" : "Kirjaa tulokset")+"</small>";
 }
 
 function courtCard(r, c, match){
@@ -371,9 +379,18 @@ function courtCard(r, c, match){
   teams.appendChild(tA); teams.appendChild(el("div","vs","VS")); teams.appendChild(tB);
   card.appendChild(teams);
 
-  // nykyinen arvo: tallennettu tai puoliväli
+  // nykyinen arvo: keskeneräinen syöttö, tallennettu tai puoliväli
   const saved = S.scores[r][c];
-  let a = saved ? saved[0] : Math.floor(S.target/2);
+  const dkey = r+"-"+c;
+  const draft = S.drafts[dkey];
+  let a = draft!=null ? draft : saved ? saved[0] : Math.floor(S.target/2);
+  // koskematon = ei tallennettua tulosta eikä kukaan ole liikuttanut pisteitä
+  if(saved || draft!=null) card.dataset.touched = "1";
+  function changed(){
+    S.drafts[dkey] = a; save();
+    card.dataset.touched = "1";
+    paint(); paintRoundLabel();
+  }
 
   const scores = el("div","scores");
   const boxA = el("div","scorebox"), valA = el("div","val");
@@ -403,18 +420,27 @@ function courtCard(r, c, match){
     slider.style.setProperty("--pct", (a/S.target*100)+"%");
     card.dataset.a = a;
   }
-  slider.addEventListener("input", ()=>{ a = parseInt(slider.value,10); paint(); });
-  minus.addEventListener("click", ()=>{ a=Math.max(0,a-1); paint(); });
-  plus .addEventListener("click", ()=>{ a=Math.min(S.target,a+1); paint(); });
+  slider.addEventListener("input", ()=>{ a = parseInt(slider.value,10); changed(); });
+  minus.addEventListener("click", ()=>{ a=Math.max(0,a-1); changed(); });
+  plus .addEventListener("click", ()=>{ a=Math.min(S.target,a+1); changed(); });
   paint();
   return card;
 }
 
 $("confirmBtn").addEventListener("click", ()=>{
   const cards = $("courts").children;
+  // Estää vahingossa tallennetun oletustuloksen (esim. tuplanapautus tai unohtunut kenttä).
+  const untouched = [];
+  for(let c=0;c<COURTS;c++) if(!cards[c].dataset.touched) untouched.push(c);
+  if(untouched.length){
+    const a0 = parseInt(cards[untouched[0]].dataset.a,10);
+    const which = untouched.map(c=>"Kenttä "+(c+1)).join(" ja ");
+    if(!confirm(which+": pisteitä ei ole muutettu ("+a0+"–"+(S.target-a0)+"). Tallennetaanko silti?")) return;
+  }
   for(let c=0;c<COURTS;c++){
     const a = parseInt(cards[c].dataset.a,10);
     S.scores[S.round][c] = [a, S.target-a];
+    delete S.drafts[S.round+"-"+c];
   }
   save();
   if(S.round < ROUNDS-1){

@@ -1,5 +1,5 @@
 /* Offline-tuki: appi latautuu välimuistista jos hallissa ei ole kenttää. */
-const CACHE = "americano-v1";
+const CACHE = "americano-v2";
 const ASSETS = ["./", "./index.html"];
 
 self.addEventListener("install", e => {
@@ -16,14 +16,20 @@ self.addEventListener("activate", e => {
 
 self.addEventListener("fetch", e => {
   if (e.request.method !== "GET") return;
-  // Cache-first: offline on tärkeämpää kuin tuoreus, appi on staattinen.
+  if (new URL(e.request.url).origin !== self.location.origin) return;
+  // Välimuisti ensin (offline ja nopeus), mutta tuore versio haetaan aina taustalla
+  // talteen, joten päivitys näkyy seuraavalla avauskerralla.
+  const fresh = fetch(e.request).then(res => {
+    if (res.ok) {
+      const copy = res.clone();
+      return caches.open(CACHE).then(c => c.put(e.request, copy)).then(() => res);
+    }
+    return res;
+  });
+  e.waitUntil(fresh.catch(() => {}));
   e.respondWith(
     caches.match(e.request, { ignoreSearch: true }).then(hit =>
-      hit || fetch(e.request).then(res => {
-        const copy = res.clone();
-        caches.open(CACHE).then(c => c.put(e.request, copy)).catch(() => {});
-        return res;
-      }).catch(() => caches.match("./index.html"))
+      hit || fresh.catch(() => caches.match("./index.html"))
     )
   );
 });
