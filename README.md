@@ -1,7 +1,18 @@
 # Padel Americano — 8 pelaajaa
 
-Staattinen web-appi americano-turnauksen pyörittämiseen puhelimessa.
-Ei build-vaihetta, ei riippuvuuksia, ei backendiä. Kaksi tiedostoa.
+**Avaa appi: https://padel-americano-ten.vercel.app**
+
+Ilmainen puhelimessa toimiva appi kahdeksan pelaajan padel americano -turnauksen
+pyörittämiseen. Appi kertoo joka kierroksella, kuka pelaa kenen kanssa ja millä
+kentällä, kirjaa tulokset ja laskee pistetilanteen. Mitään ei tarvitse asentaa
+eikä mihinkään kirjautua: avaa linkki, syötä nimet ja aloita.
+
+- Tulokset tallentuvat vain omaan puhelimeesi. Mitään ei lähetetä minnekään.
+- Toimii myös ilman verkkoa, kun olet avannut appin kerran.
+- Saa käyttää, kopioida ja muokata vapaasti (MIT-lisenssi, ks. `LICENSE`).
+
+*In English: a free, install-free phone web app for running an 8-player,
+2-court padel americano tournament. The interface is in Finnish.*
 
 ## Turnausmuoto
 
@@ -11,7 +22,10 @@ Ei build-vaihetta, ei riippuvuuksia, ei backendiä. Kaksi tiedostoa.
   - jokainen kohtaa jokaisen vastustajana **täsmälleen kaksi kertaa**
 - Voittaja ratkeaa henkilökohtaisilla kokonaispisteillä, tasapisteissä pistero (+/−)
 
-## Deploy Verceliin
+## Oman version julkaisu Verceliin
+
+Tätä tarvitset vain, jos haluat julkaista oman kopion. Appissa ei ole
+rakennusvaihetta, riippuvuuksia eikä taustapalvelinta.
 
 ```bash
 cd ~/padel-americano && npx vercel --prod
@@ -32,8 +46,11 @@ npx --cache /tmp/npm-cache vercel --prod
 2. Jaa-nappi → **Lisää Koti-valikkoon**
 3. Avaa kotivalikosta — käynnistyy ilman selainpalkkeja
 
-Service worker tallentaa appin välimuistiin, joten se toimii myös ilman
+Appi tallentuu puhelimen välimuistiin, joten se toimii myös ilman
 verkkoyhteyttä sen jälkeen kun olet avannut sen kerran.
+
+Kun appiin tulee päivitys, se näkyy vasta toisella avauskerralla verkossa:
+ensimmäinen avaus hakee uuden version taustalla, toinen näyttää sen.
 
 ## Käyttö kentällä
 
@@ -41,11 +58,14 @@ verkkoyhteyttä sen jälkeen kun olet avannut sen kerran.
 - Joka kierroksella: liu'uta tai näpäytä ± vasemman joukkueen pisteisiin,
   oikean joukkueen pisteet täydentyvät automaattisesti (summa = 24)
 - **Tallenna ja seuraava kierros**
+- Jos kentän pisteisiin ei ole koskettu, appi kysyy varmistuksen ennen tallennusta
 - **Tilanne** = elävä pistetilanne, **Kierrokset** = koko aikataulu, napauta muokataksesi
-- Tilanne tallentuu automaattisesti puhelimen muistiin — puhelimen voi lukita
-  tai Safarin sulkea kesken turnauksen
+- Tilanne ja keskeneräinen pistesyöttö tallentuvat automaattisesti puhelimen
+  muistiin — puhelimen voi lukita tai Safarin sulkea kesken turnauksen
+- **Nollaa turnaus** löytyy Tilanne-näkymän alareunasta
 
 ## Tiedostot
 
 - `index.html` — koko appi (HTML + CSS + JS)
-- `sw.js` — service worker offline-tukea varten
+- `sw.js` — offline-tuki (service worker)
+- `BUGIT.md` — tiedossa olevat pienet, korjaamatta jätetyt bugit
